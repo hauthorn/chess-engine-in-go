@@ -1,4 +1,4 @@
-package board
+package own_chess
 
 import (
 	"reflect"
