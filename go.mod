@@ -2,7 +2,10 @@ module hauthorn.me/chess-engine-in-go
 
 go 1.18
 
-require github.com/gin-gonic/gin v1.8.1
+require (
+	github.com/gin-gonic/gin v1.8.1
+	github.com/notnil/chess v1.8.0
+)
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect

@@ -65,12 +65,41 @@
         if (move === null) return 'snapback'
 
         updateStatus()
+
+        updateServer(move).then(function () {
+            requestMoveFromServer()
+        })
     }
 
     // update the board position after the piece snap
     // for castling, en passant, pawn promotion
     function onSnapEnd() {
         board.position(game.fen())
+    }
+
+    function resetServer() {
+        return $.ajax("/reset", {
+            contentType: 'application/json',
+            type: 'POST',
+        })
+    }
+
+    function updateServer(move) {
+        return $.ajax("/move", {
+            data: JSON.stringify({san: move.san}),
+            contentType: 'application/json',
+            type: 'POST',
+        })
+    }
+
+    function requestMoveFromServer() {
+        return $.get("/move").then(function (response) {
+            console.log("Response", response)
+            let move = game.move(response.move, {sloppy: true})
+            board.position(game.fen())
+            console.log("Resulting move", move)
+            updateStatus()
+        })
     }
 
     function updateStatus() {
@@ -106,6 +135,7 @@
     }
 
     function reset() {
+        resetServer()
         board.start();
         game.reset()
         updateStatus()
@@ -130,7 +160,8 @@
     $('#switch').on('click', board.flip)
     $('#clear').on('click', clear)
 
-    updateStatus();
+    resetServer()
+    updateStatus()
 </script>
 
 </body>
