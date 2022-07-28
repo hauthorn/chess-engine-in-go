@@ -16,7 +16,8 @@ func main() {
 
 	game = newGame()
 
-	engine = engines.RandomMoves{}
+	// engine = engines.RandomMoves{}
+	engine = engines.NaiveEngine{Depth: 2}
 
 	// All the static front end assets
 	r.LoadHTMLFiles("web/index.html")
