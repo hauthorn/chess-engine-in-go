@@ -106,4 +106,19 @@ func TestNaiveEngine_BestMove(t *testing.T) {
 			t.Errorf("BestMove() = %v, want %v", got, want)
 		}
 	})
+
+	t.Run("should prefer pawn advancement in center", func(t *testing.T) {
+		r := NaiveEngine{
+			Depth: 0,
+		}
+
+		// Just a single pawn, should prefer to advance it 2 spaces in the center
+		fen, _ := chess.FEN("4k3/8/8/8/8/8/P3P2P/4K3 w - - 0 1")
+		g := chess.NewGame(fen)
+
+		want := "e2e4"
+		if got := r.BestMove(g); !reflect.DeepEqual(got.String(), want) {
+			t.Errorf("BestMove() = %v, want %v", got, want)
+		}
+	})
 }
