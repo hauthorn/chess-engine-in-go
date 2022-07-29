@@ -17,10 +17,9 @@ func (r NaiveEngine) BestMove(game *chess.Game) *chess.Move {
 
 	// For every valid move, calculate the score of the move
 	for _, m := range validMoves {
-		g := game.Clone()
-		g.Move(m)
-
-		score := score(g, r.Depth)
+		sourcePosition := game.Position()
+		afterMove := sourcePosition.Update(m)
+		score := score(afterMove, r.Depth)
 
 		if score > bestScore {
 			bestScore = score
@@ -31,23 +30,17 @@ func (r NaiveEngine) BestMove(game *chess.Game) *chess.Move {
 	return bestMove
 }
 
-func score(game *chess.Game, depth uint8) int {
-	position := game.Position()
+func score(position *chess.Position, depth uint8) int {
 	currentColor := position.Turn()
+	outcome := position.Status()
 
-	switch game.Outcome() {
-	case chess.Draw:
+	switch outcome {
+	case chess.InsufficientMaterial:
 		return 0
-	case chess.WhiteWon:
-		if currentColor == chess.Black {
-			return 1000000
-		}
-		return -1000000
-	case chess.BlackWon:
-		if currentColor == chess.White {
-			return 1000000
-		}
-		return -1000000
+	case chess.Stalemate:
+		return 0
+	case chess.Checkmate:
+		return 1000000
 	}
 
 	if depth == 0 {
@@ -81,11 +74,10 @@ func score(game *chess.Game, depth uint8) int {
 	worstScore := 100000
 
 	// For every valid move, calculate the score of the move
-	for _, m := range game.ValidMoves() {
-		g := game.Clone()
-		g.Move(m)
+	for _, m := range position.ValidMoves() {
+		afterMove := position.Update(m)
 
-		score := -score(g, depth-1)
+		score := -score(afterMove, depth-1)
 
 		if score < worstScore {
 			worstScore = score
