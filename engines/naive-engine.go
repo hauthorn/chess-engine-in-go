@@ -31,7 +31,6 @@ func (r NaiveEngine) BestMove(game *chess.Game) *chess.Move {
 }
 
 func score(position *chess.Position, depth uint8) int {
-	currentColor := position.Turn()
 	outcome := position.Status()
 
 	switch outcome {
@@ -44,31 +43,7 @@ func score(position *chess.Position, depth uint8) int {
 	}
 
 	if depth == 0 {
-		score := 0
-
-		for i := chess.Square(0); i < 64; i++ {
-			piece := position.Board().Piece(i)
-			pieceValue := 0
-			switch piece.Type() {
-			case chess.Queen:
-				pieceValue = 900
-			case chess.Rook:
-				pieceValue = 500
-			case chess.Bishop:
-				pieceValue = 320
-			case chess.Knight:
-				pieceValue = 300
-			case chess.Pawn:
-				pieceValue = pawnPoints(i, piece.Color())
-			}
-			if piece.Color() != currentColor {
-				score += pieceValue
-			} else {
-				score -= pieceValue
-			}
-		}
-
-		return score
+		return SimpleStaticScore(position)
 	}
 
 	worstScore := 100000
