@@ -2,7 +2,6 @@ package engines
 
 import (
 	"github.com/notnil/chess"
-	"math"
 )
 
 type NaiveEngine struct {
@@ -12,7 +11,13 @@ type NaiveEngine struct {
 func (r NaiveEngine) BestMove(game *chess.Game) *chess.Move {
 	validMoves := game.ValidMoves()
 
-	bestScore := -100000
+	var bestScore int
+	turn := game.Position().Turn()
+	if turn == chess.White {
+		bestScore = -BigNumber
+	} else {
+		bestScore = BigNumber
+	}
 	var bestMove *chess.Move = nil
 
 	// For every valid move, calculate the score of the move
@@ -21,9 +26,16 @@ func (r NaiveEngine) BestMove(game *chess.Game) *chess.Move {
 		afterMove := sourcePosition.Update(m)
 		score := score(afterMove, r.Depth)
 
-		if score > bestScore {
-			bestScore = score
-			bestMove = m
+		if turn == chess.White {
+			if score > bestScore {
+				bestScore = score
+				bestMove = m
+			}
+		} else {
+			if score < bestScore {
+				bestScore = score
+				bestMove = m
+			}
 		}
 	}
 
@@ -31,48 +43,31 @@ func (r NaiveEngine) BestMove(game *chess.Game) *chess.Move {
 }
 
 func score(position *chess.Position, depth uint8) int {
-	outcome := position.Status()
+	turn := position.Turn()
 
-	switch outcome {
-	case chess.InsufficientMaterial:
-		return 0
-	case chess.Stalemate:
-		return 0
-	case chess.Checkmate:
-		return 1000000
+	method := position.Status()
+	if depth == 0 || IsGameOutcome(method) {
+		return SimpleStaticScore(position, method)
 	}
 
-	if depth == 0 {
-		return SimpleStaticScore(position)
+	var worstScore = 0
+	if turn == chess.White {
+		worstScore = -BigNumber
+	} else {
+		worstScore = BigNumber
 	}
-
-	worstScore := 100000
 
 	// For every valid move, calculate the score of the move
 	for _, m := range position.ValidMoves() {
 		afterMove := position.Update(m)
 
-		score := -score(afterMove, depth-1)
+		score := score(afterMove, depth-1)
 
-		if score < worstScore {
-			worstScore = score
+		if turn == chess.White {
+			worstScore = Max(worstScore, score)
+		} else {
+			worstScore = Min(worstScore, score)
 		}
 	}
 	return worstScore
-}
-
-func pawnPoints(i chess.Square, color chess.Color) int {
-	rankPoints := 0
-	if color == chess.White {
-		rankPoints = int(i.Rank()) - 1
-	} else {
-		rankPoints = 7 - int(i.Rank())
-	}
-
-	file := i.File()
-	distance := math.Abs(3.5 - float64(file))
-	filePoints := 3 - int(math.Floor(distance))
-
-	score := 100 + rankPoints*5 + filePoints*rankPoints
-	return score
 }
