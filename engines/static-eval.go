@@ -30,9 +30,9 @@ func SimpleStaticScore(position *chess.Position, method chess.Method) int {
 		case chess.Rook:
 			pieceValue = 500
 		case chess.Bishop:
-			pieceValue = 320
+			pieceValue = bishopPoints(i, piece.Color())
 		case chess.Knight:
-			pieceValue = knightPoints(i, piece.Color())
+			pieceValue = knightPoints(i)
 		case chess.Pawn:
 			pieceValue = pawnPoints(i, piece.Color())
 		}
@@ -58,11 +58,11 @@ func pawnPoints(i chess.Square, color chess.Color) int {
 	distance := math.Abs(3.5 - float64(file))
 	filePoints := 3 - int(math.Floor(distance))
 
-	score := 100 + rankPoints*5 + filePoints*rankPoints
+	score := 100 + rankPoints*3 + filePoints*5
 	return score
 }
 
-func knightPoints(i chess.Square, color chess.Color) int {
+func knightPoints(i chess.Square) int {
 	baseScore := 280
 
 	// Knights should avoid the edges of the board
@@ -81,10 +81,20 @@ func knightPoints(i chess.Square, color chess.Color) int {
 		positionScore += 10
 	}
 
-	score := baseScore + positionScore
+	return baseScore + positionScore
+}
 
-	if color == chess.White {
-		return score
+func bishopPoints(i chess.Square, color chess.Color) int {
+	baseScore := 320
+	positionScore := 0
+
+	// We would like to punish bishops still in their starting location
+	if color == chess.White && (i == chess.F1 || i == chess.C1) {
+		positionScore -= 10
 	}
-	return -score
+	if color == chess.Black && (i == chess.F8 || i == chess.C8) {
+		positionScore -= 10
+	}
+
+	return baseScore + positionScore
 }

@@ -14,6 +14,7 @@ func TestSimpleStaticScore(t *testing.T) {
 		{"Knight at corner is minus 20", "4k3/8/8/8/8/8/8/N3K3 w - - 0 1", 260},
 		{"Knight at edge is minus 10", "4k3/8/8/7N/8/8/8/4K3 w - - 0 1", 270},
 		{"Knight at center is plus 10", "4k3/8/8/4N3/8/8/8/4K3 w - - 0 1", 290},
+		{"Bishop in starting position is minus 10", "4k3/6b1/8/8/8/8/8/4KB2 w - - 0 1", -10},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
